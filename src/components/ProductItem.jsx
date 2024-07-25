@@ -5,38 +5,6 @@ import Table from "react-bootstrap/Table";
 import { BiTrash } from "react-icons/bi";
 import EditableField from "./EditableField";
 
-const InvoiceItem = (props) => {
-  const { onItemizedItemEdit, currency, onRowDel, items, onRowAdd } = props;
-  const itemTable = items.map((item) => (
-    <ItemRow
-      key={item.itemId}
-      item={item}
-      onDelEvent={onRowDel}
-      onItemizedItemEdit={onItemizedItemEdit}
-      currency={currency}
-    />
-  ));
-
-  return (
-    <div>
-      <Table>
-        <thead>
-          <tr>
-            <th>ITEM</th>
-            <th>QTY</th>
-            <th>PRICE/RATE</th>
-            <th className="text-center">ACTION</th>
-          </tr>
-        </thead>
-        <tbody>{itemTable}</tbody>
-      </Table>
-      <Button className="fw-bold" onClick={onRowAdd}>
-        Add Item
-      </Button>
-    </div>
-  );
-};
-
 const ItemRow = (props) => {
   const onDelEvent = () => {
     props.onDelEvent(props.item);
@@ -46,59 +14,59 @@ const ItemRow = (props) => {
       <td style={{ width: "100%" }}>
         <EditableField
           onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
+            props.onItemizedItemEdit(evt, props.item.id)
           }
           cellData={{
             type: "text",
-            name: "itemName",
-            placeholder: "Item name",
-            value: props.item.itemName,
+            name: "productName",
+            placeholder: "Product name",
+            value: props.item.productName,
             id: props.item.itemId,
           }}
         />
         <EditableField
           onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
+            props.onItemizedItemEdit(evt, props.item.id)
           }
           cellData={{
             type: "text",
-            name: "itemDescription",
-            placeholder: "Item description",
-            value: props.item.itemDescription,
-            id: props.item.itemId,
+            name: "productDescription",
+            placeholder: "Product description",
+            value: props.item.productDescription,
+            id: props.item.id,
           }}
         />
       </td>
       <td style={{ minWidth: "70px" }}>
         <EditableField
           onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
+            props.onItemizedItemEdit(evt, props.item.id)
           }
           cellData={{
             type: "number",
-            name: "itemQuantity",
+            name: "productQuantity",
             min: 1,
             step: "1",
-            value: props.item.itemQuantity,
-            id: props.item.itemId,
+            value: props.item.productQuantity,
+            id: props.item.id,
           }}
         />
       </td>
       <td style={{ minWidth: "130px" }}>
         <EditableField
           onItemizedItemEdit={(evt) =>
-            props.onItemizedItemEdit(evt, props.item.itemId)
+            props.onItemizedItemEdit(evt, props.item.id)
           }
           cellData={{
             leading: props.currency,
             type: "number",
-            name: "itemPrice",
+            name: "productPrice",
             min: 1,
             step: "0.01",
             presicion: 2,
             textAlign: "text-end",
-            value: props.item.itemPrice,
-            id: props.item.itemId,
+            value: props.item.productPrice,
+            id: props.item.id,
           }}
         />
       </td>
@@ -113,4 +81,37 @@ const ItemRow = (props) => {
   );
 };
 
-export default InvoiceItem;
+const ProductItem = (props) => {
+  const { onItemizedProductEdit, currency, onRowDel, items, onRowAdd } = props;
+
+  const itemTable = items.map((item) => (
+    <ItemRow
+      key={item.id}
+      item={item}
+      onDelEvent={onRowDel}
+      onItemizedItemEdit={onItemizedProductEdit}
+      currency={currency}
+    />
+  ));
+
+  return (
+    <div>
+      <Table>
+        <thead>
+          <tr>
+            <th>PRODUCT</th>
+            <th>QTY</th>
+            <th>PRICE/RATE</th>
+            <th className="text-center">ACTION</th>
+          </tr>
+        </thead>
+        <tbody>{itemTable}</tbody>
+      </Table>
+      <Button className="fw-bold" onClick={onRowAdd}>
+        Add New Product
+      </Button>
+    </div>
+  );
+};
+
+export default ProductItem;

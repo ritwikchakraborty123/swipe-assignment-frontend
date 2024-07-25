@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Card, Col, Row, Table } from "react-bootstrap";
 import { BiSolidPencil, BiTrash } from "react-icons/bi";
 import { BsEyeFill } from "react-icons/bs";
@@ -89,7 +89,9 @@ const InvoiceList = () => {
 
 const InvoiceRow = ({ invoice, navigate }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [productList, setproductList] = useState([]);
   const dispatch = useDispatch();
+  const { getOneProduct } = useInvoiceListData();
 
   const handleDeleteClick = (invoiceId) => {
     dispatch(deleteInvoice(invoiceId));
@@ -107,6 +109,17 @@ const InvoiceRow = ({ invoice, navigate }) => {
   const closeModal = () => {
     setIsOpen(false);
   };
+
+  const syncProductIdValue = () => {
+    let temp = [];
+    invoice.productIds.forEach((element) => {
+      temp.push(getOneProduct(element.id));
+    });
+    setproductList(temp);
+  };
+  useEffect(() => {
+    syncProductIdValue();
+  }, []);
 
   return (
     <tr>
@@ -168,6 +181,7 @@ const InvoiceRow = ({ invoice, navigate }) => {
         taxAmount={invoice.taxAmount}
         discountAmount={invoice.discountAmount}
         total={invoice.total}
+        productIds={productList}
       />
     </tr>
   );

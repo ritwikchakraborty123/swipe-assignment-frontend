@@ -1,13 +1,13 @@
-import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Button from "react-bootstrap/Button";
-import Table from "react-bootstrap/Table";
-import Modal from "react-bootstrap/Modal";
-import { BiPaperPlane, BiCloudDownload } from "react-icons/bi";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import React from "react";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Modal from "react-bootstrap/Modal";
+import Row from "react-bootstrap/Row";
+import Table from "react-bootstrap/Table";
+import { BiCloudDownload, BiPaperPlane } from "react-icons/bi";
 
 const GenerateInvoice = () => {
   html2canvas(document.querySelector("#invoiceCapture")).then((canvas) => {
@@ -75,6 +75,8 @@ const InvoiceModal = (props) => {
                 <div>{props.info.dateOfIssue || ""}</div>
               </Col>
             </Row>
+            <h4 className="fw-bold my-2">Items</h4>
+
             <Table className="mb-0">
               <thead>
                 <tr>
@@ -101,6 +103,40 @@ const InvoiceModal = (props) => {
                     </tr>
                   );
                 })}
+              </tbody>
+            </Table>
+            <h4 className="fw-bold my-2">Products</h4>
+            <Table className="mb-0">
+              <thead>
+                <tr>
+                  <th>QTY</th>
+                  <th>DESCRIPTION</th>
+                  <th className="text-end">PRICE</th>
+                  <th className="text-end">AMOUNT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {props &&
+                  props.productIds &&
+                  props.productIds.map((item, i) => {
+                    return (
+                      <tr id={i} key={i}>
+                        <td style={{ width: "70px" }}>
+                          {item.productQuantity}
+                        </td>
+                        <td>
+                          {item.productName} - {item.productDescription}
+                        </td>
+                        <td className="text-end" style={{ width: "100px" }}>
+                          {props.currency} {item.productPrice}
+                        </td>
+                        <td className="text-end" style={{ width: "100px" }}>
+                          {props.currency}{" "}
+                          {item.productPrice * item.productQuantity}
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </Table>
             <Table>

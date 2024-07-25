@@ -11,9 +11,11 @@ import { useDispatch } from "react-redux";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useInvoiceListData } from "../redux/hooks";
 import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
+import { addProduct } from "../redux/productSlice";
 import generateRandomId from "../utils/generateRandomId";
 import InvoiceItem from "./InvoiceItem";
 import InvoiceModal from "./InvoiceModal";
+import ProductItem from "./ProductItem";
 
 const InvoiceForm = () => {
   const dispatch = useDispatch();
@@ -25,7 +27,13 @@ const InvoiceForm = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [copyId, setCopyId] = useState("");
-  const { getOneInvoice, listSize } = useInvoiceListData();
+  const {
+    getOneInvoice,
+    listSize,
+    productList,
+    getOneProduct,
+    getAllProducts,
+  } = useInvoiceListData();
   const [formData, setFormData] = useState(
     isEdit
       ? getOneInvoice(params.id)
@@ -63,6 +71,7 @@ const InvoiceForm = () => {
               itemQuantity: 1,
             },
           ],
+          productIds: [],
         }
   );
 
@@ -76,6 +85,13 @@ const InvoiceForm = () => {
     );
     setFormData({ ...formData, items: updatedItems });
     handleCalculateTotal();
+  };
+
+  const onProductDel = (productToDelete) => {
+    const updatedIds = formData.productIds.filter(
+      (item) => item.id !== productToDelete.id
+    );
+    setFormData({ ...formData, productIds: updatedIds });
   };
 
   const handleAddEvent = () => {
@@ -92,6 +108,21 @@ const InvoiceForm = () => {
       items: [...formData.items, newItem],
     });
     handleCalculateTotal();
+  };
+
+  const handleAddProductEvent = () => {
+    const id = (+new Date() + Math.floor(Math.random() * 999999)).toString(36);
+    const newProduct = {
+      id: id,
+      productName: "",
+      productDescription: "",
+      productPrice: "1.00",
+      productQuantity: 1,
+    };
+    setFormData({
+      ...formData,
+      productIds: [...formData.productIds, newProduct],
+    });
   };
 
   const handleCalculateTotal = () => {
@@ -136,7 +167,16 @@ const InvoiceForm = () => {
     setFormData({ ...formData, items: updatedItems });
     handleCalculateTotal();
   };
+  const onItemizedProductEdit = (evt, id) => {
+    const updatedItems = formData.productIds.map((oldItem) => {
+      if (oldItem.id === id) {
+        return { ...oldItem, [evt.target.name]: evt.target.value };
+      }
+      return oldItem;
+    });
 
+    setFormData({ ...formData, productIds: updatedItems });
+  };
   const editField = (name, value) => {
     setFormData({ ...formData, [name]: value });
     handleCalculateTotal();
@@ -156,7 +196,34 @@ const InvoiceForm = () => {
     setIsOpen(false);
   };
 
+  const syncProductIdValue = () => {
+    let temp = [];
+    formData.productIds.forEach((element) => {
+      temp.push(getOneProduct(element.id));
+    });
+    setFormData({ ...formData, productIds: temp });
+  };
+
+  const showAllProducts = () => {
+    setFormData({ ...formData, productIds: getAllProducts() });
+  };
+
+  useEffect(() => {
+    if (!isEdit && !params.id) {
+      showAllProducts();
+    } else {
+      syncProductIdValue();
+    }
+  }, []);
+
   const handleAddInvoice = () => {
+    let temp = [];
+    formData.productIds.forEach((e) => {
+      dispatch(addProduct(e));
+      temp.push({ id: e.id });
+    });
+    formData.productIds = temp;
+
     if (isEdit) {
       dispatch(updateInvoice({ id: params.id, updatedInvoice: formData }));
       alert("Invoice updated successfuly 🥳");
@@ -173,10 +240,16 @@ const InvoiceForm = () => {
   const handleCopyInvoice = () => {
     const recievedInvoice = getOneInvoice(copyId);
     if (recievedInvoice) {
+      let temp = [];
+      recievedInvoice.productIds.forEach((element) => {
+        temp.push(getOneProduct(element.id));
+      });
+
       setFormData({
         ...recievedInvoice,
         id: formData.id,
         invoiceNumber: formData.invoiceNumber,
+        productIds: temp,
       });
     } else {
       alert("Invoice does not exists!!!!!");
@@ -301,14 +374,26 @@ const InvoiceForm = () => {
                 />
               </Col>
             </Row>
-            <InvoiceItem
-              onItemizedItemEdit={onItemizedItemEdit}
-              onRowAdd={handleAddEvent}
-              onRowDel={handleRowDel}
-              currency={formData.currency}
-              items={formData.items}
-            />
-            <Row className="mt-4 justify-content-end">
+            <Row className="mb-4 ">
+              <InvoiceItem
+                onItemizedItemEdit={onItemizedItemEdit}
+                onRowAdd={handleAddEvent}
+                onRowDel={handleRowDel}
+                currency={formData.currency}
+                items={formData.items}
+              />
+            </Row>
+            <Row className="mb-4 ">
+              <ProductItem
+                onItemizedProductEdit={onItemizedProductEdit}
+                onRowAdd={handleAddProductEvent}
+                onRowDel={onProductDel}
+                currency={formData.currency}
+                items={formData.productIds}
+              />
+            </Row>
+
+            <Row className="justify-content-end">
               <Col lg={6}>
                 <div className="d-flex flex-row align-items-start justify-content-between">
                   <span className="fw-bold">Subtotal:</span>
@@ -398,6 +483,7 @@ const InvoiceForm = () => {
                 discountAmount: formData.discountAmount,
               }}
               items={formData.items}
+              productIds={formData.productIds}
               currency={formData.currency}
               subTotal={formData.subTotal}
               taxAmount={formData.taxAmount}
