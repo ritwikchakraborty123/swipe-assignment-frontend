@@ -14,21 +14,20 @@ const productsSlice = createSlice({
         state.push(action.payload);
       }
     },
+    convertAllProdCurr: (state, action) => {
+      const conversionRate = action.payload;
+      return state.map((product) => ({
+        ...product,
+        productPrice: product.productPrice * conversionRate,
+      }));
+    },
     deleteProduct: (state, action) => {
       return state.filter((product) => product.id !== action.payload);
-    },
-    updateProduct: (state, action) => {
-      const index = state.findIndex(
-        (product) => product.id === action.payload.id
-      );
-      if (index !== -1) {
-        state[index] = action.payload.updatedProduct;
-      }
     },
   },
 });
 
-export const { addProduct, deleteProduct, updateProduct } =
+export const { addProduct, deleteProduct, convertAllProdCurr } =
   productsSlice.actions;
 
 export const selectProductList = (state) => state.products;

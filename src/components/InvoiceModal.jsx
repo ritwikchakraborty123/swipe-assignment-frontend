@@ -8,6 +8,7 @@ import Modal from "react-bootstrap/Modal";
 import Row from "react-bootstrap/Row";
 import Table from "react-bootstrap/Table";
 import { BiCloudDownload, BiPaperPlane } from "react-icons/bi";
+import convertCodeToSymbol from "../utils/currencySymbolToCodeConverter";
 
 const GenerateInvoice = () => {
   html2canvas(document.querySelector("#invoiceCapture")).then((canvas) => {
@@ -52,7 +53,7 @@ const InvoiceModal = (props) => {
               <h6 className="fw-bold mt-1 mb-2">Amount&nbsp;Due:</h6>
               <h5 className="fw-bold text-secondary">
                 {" "}
-                {props.currency} {props.total}
+                {convertCodeToSymbol(props.currency)} {props.total}
               </h5>
             </div>
           </div>
@@ -98,7 +99,8 @@ const InvoiceModal = (props) => {
                         {props.currency} {item.itemPrice}
                       </td>
                       <td className="text-end" style={{ width: "100px" }}>
-                        {props.currency} {item.itemPrice * item.itemQuantity}
+                        {convertCodeToSymbol(props.currency)}{" "}
+                        {item.itemPrice * item.itemQuantity}
                       </td>
                     </tr>
                   );
@@ -131,7 +133,7 @@ const InvoiceModal = (props) => {
                           {props.currency} {item.productPrice}
                         </td>
                         <td className="text-end" style={{ width: "100px" }}>
-                          {props.currency}{" "}
+                          {convertCodeToSymbol(props.currency)}{" "}
                           {item.productPrice * item.productQuantity}
                         </td>
                       </tr>
@@ -152,7 +154,7 @@ const InvoiceModal = (props) => {
                     TAX
                   </td>
                   <td className="text-end" style={{ width: "100px" }}>
-                    {props.currency} {props.taxAmmount}
+                    {convertCodeToSymbol(props.currency)} {props.taxAmmount}
                   </td>
                 </tr>
                 {props.discountAmmount !== 0.0 && (
@@ -162,7 +164,8 @@ const InvoiceModal = (props) => {
                       DISCOUNT
                     </td>
                     <td className="text-end" style={{ width: "100px" }}>
-                      {props.currency} {props.discountAmmount}
+                      {convertCodeToSymbol(props.currency)}{" "}
+                      {props.discountAmmount}
                     </td>
                   </tr>
                 )}
@@ -172,7 +175,7 @@ const InvoiceModal = (props) => {
                     TOTAL
                   </td>
                   <td className="text-end" style={{ width: "100px" }}>
-                    {props.currency} {props.total}
+                    {convertCodeToSymbol(props.currency)} {props.total}
                   </td>
                 </tr>
               </tbody>

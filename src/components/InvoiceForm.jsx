@@ -9,9 +9,12 @@ import Row from "react-bootstrap/Row";
 import { BiArrowBack } from "react-icons/bi";
 import { useDispatch } from "react-redux";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { changeCurrency } from "../redux/currencySlice";
 import { useInvoiceListData } from "../redux/hooks";
 import { addInvoice, updateInvoice } from "../redux/invoicesSlice";
-import { addProduct } from "../redux/productSlice";
+import { addProduct, convertAllProdCurr } from "../redux/productSlice";
+import convertCurrencyApi from "../utils/convertCurrency";
+import convertCodeToSymbol from "../utils/currencySymbolToCodeConverter";
 import generateRandomId from "../utils/generateRandomId";
 import InvoiceItem from "./InvoiceItem";
 import InvoiceModal from "./InvoiceModal";
@@ -33,7 +36,9 @@ const InvoiceForm = () => {
     productList,
     getOneProduct,
     getAllProducts,
+    getCurrentCurrency,
   } = useInvoiceListData();
+
   const [formData, setFormData] = useState(
     isEdit
       ? getOneInvoice(params.id)
@@ -61,7 +66,7 @@ const InvoiceForm = () => {
           taxAmount: "0.00",
           discountRate: "",
           discountAmount: "0.00",
-          currency: "$",
+          currency: "INR",
           items: [
             {
               itemId: 0,
@@ -75,6 +80,33 @@ const InvoiceForm = () => {
         }
   );
 
+  useEffect(() => {
+    const updateCurrency = async () => {
+      if (getCurrentCurrency && getCurrentCurrency !== formData.currency) {
+        try {
+          let rate = await convertCurrencyApi(
+            formData.currency,
+            getCurrentCurrency
+          );
+
+          setFormData((prevFormData) => {
+            return {
+              ...prevFormData,
+              items: prevFormData.items.map((e) => {
+                return { ...e, itemPrice: e.itemPrice * rate };
+              }),
+
+              currency: getCurrentCurrency,
+            };
+          });
+        } catch (e) {
+          console.error("Error converting currency:", e);
+        }
+      }
+    };
+
+    updateCurrency();
+  }, [getCurrentCurrency]);
   useEffect(() => {
     handleCalculateTotal();
   }, []);
@@ -182,8 +214,23 @@ const InvoiceForm = () => {
     handleCalculateTotal();
   };
 
-  const onCurrencyChange = (selectedOption) => {
-    setFormData({ ...formData, currency: selectedOption.currency });
+  const onCurrencyChange = async (selectedOption) => {
+    let rate = await convertCurrencyApi(
+      formData.currency,
+      selectedOption.currency
+    );
+
+    dispatch(convertAllProdCurr(rate));
+
+    setFormData((prevFormData) => {
+      return {
+        ...prevFormData,
+        productIds: prevFormData.productIds.map((e) => {
+          return { ...e, productPrice: e.productPrice * rate };
+        }),
+      };
+    });
+    dispatch(changeCurrency(selectedOption.currency));
   };
 
   const openModal = (event) => {
@@ -398,7 +445,7 @@ const InvoiceForm = () => {
                 <div className="d-flex flex-row align-items-start justify-content-between">
                   <span className="fw-bold">Subtotal:</span>
                   <span>
-                    {formData.currency}
+                    {convertCodeToSymbol(formData.currency)}
                     {formData.subTotal}
                   </span>
                 </div>
@@ -408,7 +455,7 @@ const InvoiceForm = () => {
                     <span className="small">
                       ({formData.discountRate || 0}%)
                     </span>
-                    {formData.currency}
+                    {convertCodeToSymbol(formData.currency)}
                     {formData.discountAmount || 0}
                   </span>
                 </div>
@@ -416,7 +463,7 @@ const InvoiceForm = () => {
                   <span className="fw-bold">Tax:</span>
                   <span>
                     <span className="small">({formData.taxRate || 0}%)</span>
-                    {formData.currency}
+                    {convertCodeToSymbol(formData.currency)}
                     {formData.taxAmount || 0}
                   </span>
                 </div>
@@ -427,7 +474,7 @@ const InvoiceForm = () => {
                 >
                   <span className="fw-bold">Total:</span>
                   <span className="fw-bold">
-                    {formData.currency}
+                    {convertCodeToSymbol(formData.currency)}
                     {formData.total || 0}
                   </span>
                 </div>
@@ -496,17 +543,19 @@ const InvoiceForm = () => {
                 onChange={(event) =>
                   onCurrencyChange({ currency: event.target.value })
                 }
+                value={formData.currency}
                 className="btn btn-light my-1"
                 aria-label="Change Currency"
               >
-                <option value="$">USD (United States Dollar)</option>
-                <option value="£">GBP (British Pound Sterling)</option>
-                <option value="¥">JPY (Japanese Yen)</option>
-                <option value="$">CAD (Canadian Dollar)</option>
-                <option value="$">AUD (Australian Dollar)</option>
-                <option value="$">SGD (Singapore Dollar)</option>
-                <option value="¥">CNY (Chinese Renminbi)</option>
-                <option value="₿">BTC (Bitcoin)</option>
+                <option value="INR">INR (Indian Rupee)</option>
+                <option value="USD">USD (United States Dollar)</option>
+                <option value="GBP">GBP (British Pound Sterling)</option>
+                <option value="JPY">JPY (Japanese Yen)</option>
+                <option value="CAD">CAD (Canadian Dollar)</option>
+                <option value="AUD">AUD (Australian Dollar)</option>
+                <option value="SGD">SGD (Singapore Dollar)</option>
+                <option value="CNY">CNY (Chinese Renminbi)</option>
+                <option value="BTC">BTC (Bitcoin)</option>
               </Form.Select>
             </Form.Group>
             <Form.Group className="my-3">

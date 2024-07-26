@@ -7,9 +7,11 @@ import { Link, useNavigate } from "react-router-dom";
 import InvoiceModal from "../components/InvoiceModal";
 import { useInvoiceListData } from "../redux/hooks";
 import { deleteInvoice } from "../redux/invoicesSlice";
+import convertCodeToSymbol from "../utils/currencySymbolToCodeConverter";
 
 const InvoiceList = () => {
   const { invoiceList, getOneInvoice } = useInvoiceListData();
+
   const isListEmpty = invoiceList.length === 0;
   const [copyId, setCopyId] = useState("");
   const navigate = useNavigate();
@@ -127,7 +129,7 @@ const InvoiceRow = ({ invoice, navigate }) => {
       <td className="fw-normal">{invoice.billTo}</td>
       <td className="fw-normal">{invoice.dateOfIssue}</td>
       <td className="fw-normal">
-        {invoice.currency}
+        {convertCodeToSymbol(invoice.currency)}
         {invoice.total}
       </td>
       <td style={{ width: "5%" }}>

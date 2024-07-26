@@ -3,8 +3,8 @@ import React from "react";
 import Button from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
 import { BiTrash } from "react-icons/bi";
+import convertCodeToSymbol from "../utils/currencySymbolToCodeConverter";
 import EditableField from "./EditableField";
-
 const InvoiceItem = (props) => {
   const { onItemizedItemEdit, currency, onRowDel, items, onRowAdd } = props;
   const itemTable = items.map((item) => (
@@ -90,7 +90,7 @@ const ItemRow = (props) => {
             props.onItemizedItemEdit(evt, props.item.itemId)
           }
           cellData={{
-            leading: props.currency,
+            leading: convertCodeToSymbol(props.currency),
             type: "number",
             name: "itemPrice",
             min: 1,
