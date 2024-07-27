@@ -99,6 +99,7 @@ const InvoiceForm = () => {
               currency: getCurrentCurrency,
             };
           });
+          handleCalculateTotal();
         } catch (e) {
           console.error("Error converting currency:", e);
         }
@@ -231,6 +232,7 @@ const InvoiceForm = () => {
       };
     });
     dispatch(changeCurrency(selectedOption.currency));
+    handleCalculateTotal();
   };
 
   const openModal = (event) => {

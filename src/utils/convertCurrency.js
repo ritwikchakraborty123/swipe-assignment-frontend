@@ -1,7 +1,6 @@
 import Freecurrencyapi from "@everapi/freecurrencyapi-js";
-
 const freecurrencyapi = new Freecurrencyapi(
-  "fca_live_SPuM1btFXCSppCi0MjdRnNLxcGQlChe7tLuFjXIE"
+  process.env.REACT_APP_FREE_CURRENCY_API_KEY
 );
 const convertCurrencyApi = async (from, to) => {
   try {
@@ -10,7 +9,6 @@ const convertCurrencyApi = async (from, to) => {
       currencies: to,
     });
 
-    console.log(from, to, response.data[to]);
     return response.data[to];
   } catch (e) {
     console.log("error", e);

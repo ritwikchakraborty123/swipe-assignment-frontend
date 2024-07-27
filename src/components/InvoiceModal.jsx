@@ -9,6 +9,7 @@ import Row from "react-bootstrap/Row";
 import Table from "react-bootstrap/Table";
 import { BiCloudDownload, BiPaperPlane } from "react-icons/bi";
 import convertCodeToSymbol from "../utils/currencySymbolToCodeConverter";
+import roundUpDecimal from "../utils/roundUpDecimal";
 
 const GenerateInvoice = () => {
   html2canvas(document.querySelector("#invoiceCapture")).then((canvas) => {
@@ -96,7 +97,7 @@ const InvoiceModal = (props) => {
                         {item.itemName} - {item.itemDescription}
                       </td>
                       <td className="text-end" style={{ width: "100px" }}>
-                        {props.currency} {item.itemPrice}
+                        {convertCodeToSymbol(props.currency)} {item.itemPrice}
                       </td>
                       <td className="text-end" style={{ width: "100px" }}>
                         {convertCodeToSymbol(props.currency)}{" "}
@@ -130,11 +131,14 @@ const InvoiceModal = (props) => {
                           {item.productName} - {item.productDescription}
                         </td>
                         <td className="text-end" style={{ width: "100px" }}>
-                          {props.currency} {item.productPrice}
+                          {convertCodeToSymbol(props.currency)}{" "}
+                          {roundUpDecimal(item.productPrice)}
                         </td>
                         <td className="text-end" style={{ width: "100px" }}>
                           {convertCodeToSymbol(props.currency)}{" "}
-                          {item.productPrice * item.productQuantity}
+                          {roundUpDecimal(
+                            item.productPrice * item.productQuantity
+                          )}
                         </td>
                       </tr>
                     );
